@@ -1,7 +1,9 @@
-require 'erb'
-require 'bigdecimal'
-require 'fileutils'
-require 'pathname'
+# frozen_string_literal: true
+
+require "erb"
+require "bigdecimal"
+require "fileutils"
+require "pathname"
 
 TEMPLATE = ERB.new(<<~ERB)
 <svg xmlns="http://www.w3.org/2000/svg" width="60" height="20">
@@ -23,7 +25,7 @@ end
 
 def generate_svg_file(num, color, filename)
   svg = render_svg(num, color)
-  File.open(filename, 'w') do |f|
+  File.open(filename, "w") do |f|
     f.write(svg)
   end
 end
@@ -43,10 +45,10 @@ def prepare_svg_filename(sign, num)
 end
 
 def generate(sign, color)
-  sign_for_dir = sign == '+' ? 'up' : 'down'
+  sign_for_dir = sign == "+" ? "up" : "down"
 
-  i = BigDecimal('0')
-  step = BigDecimal('0.1')
+  i = BigDecimal("0")
+  step = BigDecimal("0.1")
   while i < 100
     i += step
     filename = prepare_svg_filename(sign_for_dir, i)
@@ -54,6 +56,6 @@ def generate(sign, color)
   end
 end
 
-generate('+', '#34d058')
-generate('-', '#c34349')
-generate_svg_file('0', '#444D56', Pathname.new(__dir__).join("../assets/0.svg"))
+generate("+", "#34d058")
+generate("-", "#c34349")
+generate_svg_file("0", "#444D56", Pathname.new(__dir__).join("../assets/0.svg"))
