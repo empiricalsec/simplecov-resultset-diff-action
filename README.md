@@ -19,7 +19,7 @@ with:
 ## Inputs
 
 | Inputs          | Required | Default | Description                                                                                   |
-|-----------------|----------|---------|-----------------------------------------------------------------------------------------------|
+| --------------- | -------- | ------- | --------------------------------------------------------------------------------------------- |
 | base-stats-path | true     |         | Path to the SimpleCov generated ".resultset.json" file from the base branch.                  |
 | head-stats-path | true     |         | Path to the SimpleCov generated "resultset.json" file from the head branch.                   |
 | token           | true     |         | Github token so the package can publish a comment in the pull-request when the diff is ready. |
@@ -39,32 +39,32 @@ jobs:
     name: 'Build head'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: ruby/setup-ruby@v1
-      with:
-        bundler-cache: true
-    - name: Run test
-      run: bundle exec rspec
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+      - name: Run test
+        run: bundle exec rspec
 ```
 
 Then we will use the Github Actions feature called "[artifacts](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/persisting-workflow-data-using-artifacts)" to store that `.resultset.json` file.
 
 ```yml
-    - name: Upload coverage report
-      if: always()
-      uses: actions/upload-artifact@v2
-      with:
-        name: head-result
-        path: coverage/.resultset.json
+- name: Upload coverage report
+  if: always()
+  uses: actions/upload-artifact@v2
+  with:
+    name: head-result
+    path: coverage/.resultset.json
 ```
 
 Now you can do the exact same thing, but for the base branch. Note the checkout step!
 
 ```yml
-  build-base:
-    name: 'Build base'
-    runs-on: ubuntu-latest
-    steps:
+build-base:
+  name: 'Build base'
+  runs-on: ubuntu-latest
+  steps:
     - uses: actions/checkout@v2
       with:
         ## Here we do not checkout the current branch, but we checkout the base branch.
@@ -85,12 +85,12 @@ Now you can do the exact same thing, but for the base branch. Note the checkout 
 Now, in a new job we can retrieve both of our saved resultset from the artifacts and use this action to compare them.
 
 ```yml
-  compare:
-    name: 'Compare base & head coverages'
-    runs-on: ubuntu-latest
-    needs: [build-base, build-head]
+compare:
+  name: 'Compare base & head coverages'
+  runs-on: ubuntu-latest
+  needs: [build-base, build-head]
 
-    steps:
+  steps:
     - name: Download base artifact
       uses: actions/download-artifact@v1
       with:
@@ -115,10 +115,10 @@ That's it! When the compare job will be executed, it will post a comment in the 
 You can use the cached resultset file for comparison. To cache the resultset file that generated from the `build-base` job, it will save the build time.
 
 ```yml
-  build-base:
-    name: 'Build base'
-    runs-on: ubuntu-latest
-    steps:
+build-base:
+  name: 'Build base'
+  runs-on: ubuntu-latest
+  steps:
     - uses: actions/checkout@v2
       with:
         ref: ${{ github.base_ref }}
@@ -128,7 +128,7 @@ You can use the cached resultset file for comparison. To cache the resultset fil
 
     - name: simplecov resultset cache
       id: simplecov-resultset
-      uses:  actions/cache@v2
+      uses: actions/cache@v2
       with:
         path: coverage/.resultset.json
         key: simplecov-resultset-${{ steps.base-ref-commit.outputs.revision }}

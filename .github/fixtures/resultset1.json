@@ -2,22 +2,7 @@
   "RSpec": {
     "coverage": {
       "foo.rb": {
-        "lines": [
-          1,
-          null,
-          1,
-          0,
-          null,
-          0,
-          0,
-          0,
-          null,
-          0,
-          0,
-          0,
-          null,
-          null
-        ],
+        "lines": [1, null, 1, 0, null, 0, 0, 0, null, 0, 0, 0, null, null],
         "branches": {
           "[:if, 0, 4, 4, 4, 54]": {
             "[:then, 1, 4, 4, 4, 34]": 1,
@@ -34,22 +19,7 @@
         }
       },
       "bar.rb": {
-        "lines": [
-          1,
-          null,
-          1,
-          0,
-          null,
-          0,
-          0,
-          0,
-          null,
-          0,
-          0,
-          0,
-          null,
-          null
-        ],
+        "lines": [1, null, 1, 0, null, 0, 0, 0, null, 0, 0, 0, null, null],
         "branches": {
           "[:if, 0, 4, 4, 4, 54]": {
             "[:then, 1, 4, 4, 4, 34]": 0,
@@ -64,29 +34,14 @@
             "[:then, 8, 11, 4, 11, 28]": 0
           }
         }
-      }     
+      }
     },
     "timestamp": 1595577079
   },
   "Minitest": {
-    "coverage": {     
+    "coverage": {
       "qux.rb": {
-        "lines": [
-          1,
-          null,
-          1,
-          0,
-          null,
-          0,
-          0,
-          0,
-          null,
-          0,
-          0,
-          0,
-          null,
-          null
-        ],
+        "lines": [1, null, 1, 0, null, 0, 0, 0, null, 0, 0, 0, null, null],
         "branches": {
           "[:if, 0, 4, 4, 4, 54]": {
             "[:then, 1, 4, 4, 4, 34]": 1,
