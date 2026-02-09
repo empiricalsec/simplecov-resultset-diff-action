@@ -71,7 +71,9 @@ export class Coverage {
   constructor(resultset: ResultSet) {
     this.files = []
     for (const coverages of Object.values(resultset)) {
-      for (const [filename, coverage] of Object.entries(coverages['coverage'])) {        
+      for (const [filename, coverage] of Object.entries(
+        coverages['coverage']
+      )) {
         this.files.push({
           filename,
           lines: linesCoverage(coverage.lines),
