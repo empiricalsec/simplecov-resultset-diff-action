@@ -6,7 +6,7 @@ Creates a comment inside your Pull-Request with the difference between two Simpl
 
 ## Usage
 
-To use this Github action, in your steps you may have:
+To use this GitHub Action, in your steps you may have:
 
 ```yml
 uses: kzkn/simplecov-resultset-diff-action@v1
@@ -22,7 +22,7 @@ with:
 | --------------- | -------- | ------- | --------------------------------------------------------------------------------------------- |
 | base-stats-path | true     |         | Path to the SimpleCov generated ".resultset.json" file from the base branch.                  |
 | head-stats-path | true     |         | Path to the SimpleCov generated "resultset.json" file from the head branch.                   |
-| token           | true     |         | Github token so the package can publish a comment in the pull-request when the diff is ready. |
+| token           | true     |         | GitHub token so the package can publish a comment in the pull-request when the diff is ready. |
 
 ## Usage example
 
@@ -47,7 +47,7 @@ jobs:
         run: bundle exec rspec
 ```
 
-Then we will use the Github Actions feature called "[artifacts](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/persisting-workflow-data-using-artifacts)" to store that `.resultset.json` file.
+Then we will use the GitHub Actions feature called "[artifacts](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/persisting-workflow-data-using-artifacts)" to store that `.resultset.json` file.
 
 ```yml
 - name: Upload coverage report
