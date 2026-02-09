@@ -1,7 +1,7 @@
 {
   "name": "simplecov-resultset-diff-action",
   "description": "Post a summary of code coverage changes to a PR as a comment.",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "author": "Empirical Security",
   "type": "module",
   "private": true,
