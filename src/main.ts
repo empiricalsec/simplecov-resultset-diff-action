@@ -2,6 +2,7 @@ import * as path from 'path'
 import * as fs from 'fs'
 import * as github from '@actions/github'
 import * as core from '@actions/core'
+import {PullRequestSynchronizeEvent, PushEvent} from '@octokit/webhooks-types'
 import {markdownTable} from 'markdown-table'
 import {
   ResultSet,
@@ -115,8 +116,29 @@ export async function run(): Promise<void> {
       ])
     }
 
+    let commitSha: string
+    if (github.context.eventName === 'push') {
+      core.info('Pull sha from pushEvent')
+      const pushPayload = github.context.payload as PushEvent
+      commitSha = pushPayload.after
+    } else if (
+      github.context.eventName === 'pull_request' &&
+      github.context.payload.action === 'synchronize'
+    ) {
+      core.info('Pull sha from PullRequestSynchronizeEvent')
+      const syncPayload = github.context.payload as PullRequestSynchronizeEvent
+      commitSha = syncPayload.after
+    } else {
+      core.info('Unsupported event')
+      core.info(`eventName: ${github.context.eventName}`)
+      core.info(JSON.stringify(github.context.payload))
+      commitSha = github.context.sha
+    }
+
     const message = `## Coverage difference
 ${content}
+
+_Commit ${commitSha}_
 `
 
     /**
