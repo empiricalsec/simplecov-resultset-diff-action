@@ -33324,12 +33324,33 @@ _Commit ${commitSha}_
             info(message);
             return;
         }
-        await octokit.rest.issues.createComment({
+        const comments = await octokit.rest.issues.listComments({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            issue_number: pullRequestId,
-            body: message
+            issue_number: pullRequestId
         });
+        const expectedLogin = 'github-actions[bot]';
+        const expectedPrefix = '## Coverage difference';
+        const simplecovComment = comments.data.find(comment => comment.user &&
+            comment.user.login == expectedLogin &&
+            comment.body &&
+            comment.body.startsWith(expectedPrefix));
+        if (simplecovComment) {
+            await octokit.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: simplecovComment.id,
+                body: message
+            });
+        }
+        else {
+            await octokit.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pullRequestId,
+                body: message
+            });
+        }
     }
     catch (error) {
         setFailed(error.message);

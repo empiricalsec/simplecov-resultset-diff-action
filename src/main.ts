@@ -153,12 +153,37 @@ _Commit ${commitSha}_
       return
     }
 
-    await octokit.rest.issues.createComment({
+    const comments = await octokit.rest.issues.listComments({
       owner: github.context.repo.owner,
       repo: github.context.repo.repo,
-      issue_number: pullRequestId,
-      body: message
+      issue_number: pullRequestId
     })
+
+    const expectedLogin = 'github-actions[bot]'
+    const expectedPrefix = '## Coverage difference'
+    const simplecovComment = comments.data.find(
+      comment =>
+        comment.user &&
+        comment.user.login == expectedLogin &&
+        comment.body &&
+        comment.body.startsWith(expectedPrefix)
+    )
+
+    if (simplecovComment) {
+      await octokit.rest.issues.updateComment({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        comment_id: simplecovComment.id,
+        body: message
+      })
+    } else {
+      await octokit.rest.issues.createComment({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        issue_number: pullRequestId,
+        body: message
+      })
+    }
   } catch (error) {
     core.setFailed((error as Error).message)
   }
