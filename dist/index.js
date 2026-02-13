@@ -33291,8 +33291,34 @@ async function run() {
                 ...diff.map(formatDiff)
             ]);
         }
+        let commitSha;
+        if (context.eventName === 'push') {
+            info('Pull sha from pushEvent');
+            const pushPayload = context.payload;
+            commitSha = pushPayload.after;
+        }
+        else if (context.eventName === 'pull_request' &&
+            context.payload.action === 'synchronize') {
+            info('Pull sha from PullRequestSynchronizeEvent');
+            const syncPayload = context.payload;
+            commitSha = syncPayload.after;
+        }
+        else if (context.eventName === 'pull_request' &&
+            context.payload.action === 'opened') {
+            info('Pull sha from PullRequestOpenedEvent');
+            const openPayload = context.payload;
+            commitSha = openPayload.pull_request.head.sha;
+        }
+        else {
+            info('Unsupported event');
+            info(`eventName: ${context.eventName}`);
+            info(JSON.stringify(context.payload));
+            commitSha = context.sha;
+        }
         const message = `## Coverage difference
 ${content}
+
+_Commit ${commitSha}_
 `;
         /**
          * Publish a comment in the PR with the diff result.
@@ -33304,12 +33330,33 @@ ${content}
             info(message);
             return;
         }
-        await octokit.rest.issues.createComment({
+        const comments = await octokit.rest.issues.listComments({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            issue_number: pullRequestId,
-            body: message
+            issue_number: pullRequestId
         });
+        const expectedLogin = 'github-actions[bot]';
+        const expectedPrefix = '## Coverage difference';
+        const simplecovComment = comments.data.find(comment => comment.user &&
+            comment.user.login == expectedLogin &&
+            comment.body &&
+            comment.body.startsWith(expectedPrefix));
+        if (simplecovComment) {
+            await octokit.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: simplecovComment.id,
+                body: message
+            });
+        }
+        else {
+            await octokit.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pullRequestId,
+                body: message
+            });
+        }
     }
     catch (error) {
         setFailed(error.message);

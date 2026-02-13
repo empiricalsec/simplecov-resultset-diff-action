@@ -2,6 +2,11 @@ import * as path from 'path'
 import * as fs from 'fs'
 import * as github from '@actions/github'
 import * as core from '@actions/core'
+import {
+  PullRequestOpenedEvent,
+  PullRequestSynchronizeEvent,
+  PushEvent
+} from '@octokit/webhooks-types'
 import {markdownTable} from 'markdown-table'
 import {
   ResultSet,
@@ -115,8 +120,36 @@ export async function run(): Promise<void> {
       ])
     }
 
+    let commitSha: string
+    if (github.context.eventName === 'push') {
+      core.info('Pull sha from pushEvent')
+      const pushPayload = github.context.payload as PushEvent
+      commitSha = pushPayload.after
+    } else if (
+      github.context.eventName === 'pull_request' &&
+      github.context.payload.action === 'synchronize'
+    ) {
+      core.info('Pull sha from PullRequestSynchronizeEvent')
+      const syncPayload = github.context.payload as PullRequestSynchronizeEvent
+      commitSha = syncPayload.after
+    } else if (
+      github.context.eventName === 'pull_request' &&
+      github.context.payload.action === 'opened'
+    ) {
+      core.info('Pull sha from PullRequestOpenedEvent')
+      const openPayload = github.context.payload as PullRequestOpenedEvent
+      commitSha = openPayload.pull_request.head.sha
+    } else {
+      core.info('Unsupported event')
+      core.info(`eventName: ${github.context.eventName}`)
+      core.info(JSON.stringify(github.context.payload))
+      commitSha = github.context.sha
+    }
+
     const message = `## Coverage difference
 ${content}
+
+_Commit ${commitSha}_
 `
 
     /**
@@ -131,12 +164,37 @@ ${content}
       return
     }
 
-    await octokit.rest.issues.createComment({
+    const comments = await octokit.rest.issues.listComments({
       owner: github.context.repo.owner,
       repo: github.context.repo.repo,
-      issue_number: pullRequestId,
-      body: message
+      issue_number: pullRequestId
     })
+
+    const expectedLogin = 'github-actions[bot]'
+    const expectedPrefix = '## Coverage difference'
+    const simplecovComment = comments.data.find(
+      comment =>
+        comment.user &&
+        comment.user.login == expectedLogin &&
+        comment.body &&
+        comment.body.startsWith(expectedPrefix)
+    )
+
+    if (simplecovComment) {
+      await octokit.rest.issues.updateComment({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        comment_id: simplecovComment.id,
+        body: message
+      })
+    } else {
+      await octokit.rest.issues.createComment({
+        owner: github.context.repo.owner,
+        repo: github.context.repo.repo,
+        issue_number: pullRequestId,
+        body: message
+      })
+    }
   } catch (error) {
     core.setFailed((error as Error).message)
   }
