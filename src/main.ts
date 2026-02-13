@@ -2,7 +2,11 @@ import * as path from 'path'
 import * as fs from 'fs'
 import * as github from '@actions/github'
 import * as core from '@actions/core'
-import {PullRequestSynchronizeEvent, PushEvent} from '@octokit/webhooks-types'
+import {
+  PullRequestOpenedEvent,
+  PullRequestSynchronizeEvent,
+  PushEvent
+} from '@octokit/webhooks-types'
 import {markdownTable} from 'markdown-table'
 import {
   ResultSet,
@@ -128,6 +132,13 @@ export async function run(): Promise<void> {
       core.info('Pull sha from PullRequestSynchronizeEvent')
       const syncPayload = github.context.payload as PullRequestSynchronizeEvent
       commitSha = syncPayload.after
+    } else if (
+      github.context.eventName === 'pull_request' &&
+      github.context.payload.action === 'opened'
+    ) {
+      core.info('Pull sha from PullRequestOpenedEvent')
+      const openPayload = github.context.payload as PullRequestOpenedEvent
+      commitSha = openPayload.pull_request.head.sha
     } else {
       core.info('Unsupported event')
       core.info(`eventName: ${github.context.eventName}`)

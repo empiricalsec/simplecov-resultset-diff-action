@@ -33303,6 +33303,12 @@ async function run() {
             const syncPayload = context.payload;
             commitSha = syncPayload.after;
         }
+        else if (context.eventName === 'pull_request' &&
+            context.payload.action === 'opened') {
+            info('Pull sha from PullRequestOpenedEvent');
+            const openPayload = context.payload;
+            commitSha = openPayload.pull_request.head.sha;
+        }
         else {
             info('Unsupported event');
             info(`eventName: ${context.eventName}`);
