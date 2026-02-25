@@ -199,5 +199,3 @@ _Commit ${commitSha}_
     core.setFailed((error as Error).message)
   }
 }
-
-run()
