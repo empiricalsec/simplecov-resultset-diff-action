@@ -33362,7 +33362,6 @@ _Commit ${commitSha}_
         setFailed(error.message);
     }
 }
-run();
 
 /**
  * The entrypoint for the action. This file simply imports and runs the action's
